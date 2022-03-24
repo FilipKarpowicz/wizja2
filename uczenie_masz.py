@@ -39,26 +39,44 @@ lo, X = ekstrakcja_cech(o)
 y = np.ravel(ekstrakcja_klas(o))
 yy = keras.utils.to_categorical(y,6)
 
-
+xx = np.zeros(18)
 lista = [i for i in range(18)]
 wszystkie = pokazywanie_obiektow(o, lista)
+lista2 = []
+for i in range(18):
+    lista2.append(wszystkie[i])
+x = np.array(lista2)
 
-rozmiar = 25
-obrazy = np.zeros([len(lo),rozmiar,rozmiar,3])
-print(obrazy[1])
-for i in range(len(lo)):
-    obrazy[i,:,:,0] = cv2.resize(lo[i],(rozmiar,rozmiar))
-print(obrazy.shape)
-rozmiar_ob = (rozmiar,rozmiar,1)
 
-print(y)
-pokazywanie_obiektow(o, [1])
-b = cv2.inRange(o,(1,1,1),(255,255,255))
-# etykietowanie i ekstrakcja cech
-lol = regionprops(label(b))
-print(lol[1]['Coordinates'][0])
 
-#model neuronowy
+o = cv2.imread("PA_7_ref.png")
+lo, X = ekstrakcja_cech(o)
+y = np.ravel(ekstrakcja_klas(o))
+
+yy = keras.utils.to_categorical(y,6)
+
+model = Sequential()
+model.add(Dense(30, input_dim=18, activation='sigmoid'))
+model.add(Dense(100, activation='sigmoid'))
+model.add(Dense(6, activation='softmax'))
+model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+model.summary()
+
+trening = model.fit(X, yy, epochs=550, batch_size=15)
+
+_, dokladnosc = model.evaluate(X, yy)
+print('Dokładność: %.2f' % (dokladnosc*100))
+
+blad = trening.history['loss']
+dokladnosc = trening.history['accuracy']
+plt.plot(blad)
+plt.plot(dokladnosc)
+plt.plot(np.ones([1,len(blad)]).ravel())
+plt.legend(['błąd', 'dokładność','1'])
+plt.show()
+
+
+
 
 
 

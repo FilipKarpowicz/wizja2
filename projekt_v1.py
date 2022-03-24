@@ -77,7 +77,7 @@ def ekstrakcja_cech(o):
     ile_obiektow = len(cechy)
     lista_cech = ['EulerNumber','Area','BoundingBoxArea','FilledArea','Extent','EquivDiameter','Solidity']
     ile_cech = len(lista_cech)
-    tabela_cech = np.zeros((ile_obiektow,ile_cech+1+7)) # "1" - to jedna cecha wyliczna, "7" to momenty Hu
+    tabela_cech = np.zeros((ile_obiektow,ile_cech+1+7+3)) # "1" - to jedna cecha wyliczna, "7" to momenty Hu
     listaob = []
     for i in range(0,ile_obiektow):
         yp,xp,yk,xk = cechy[i]['BoundingBox']
@@ -91,6 +91,16 @@ def ekstrakcja_cech(o):
         hu = cv2.HuMoments(cv2.moments(binobj))
         hulog = (1 - 2*(hu>0).astype('int'))* np.nan_to_num(np.log10(np.abs(hu)),copy=True,neginf=-99,posinf=99)
         tabela_cech[i,ile_cech+1:ile_cech+8] = hulog.flatten()
+        #obiekt = pokazywanie_obiektow(o, [i])
+        #tabela_cech[i][15] = sredni_kolor(obiekt)
+        obiekt = pokazywanie_obiektow(o, [i for i in range(ile_obiektow)])
+        
+    for i in range(0,ile_obiektow):
+        #print(obiekt)
+        print(f"tutaj -----> {sredni_kolor(obiekt[i])}")
+        tabela_cech[i,15] = sredni_kolor(obiekt[i])[0]
+        tabela_cech[i,16] = sredni_kolor(obiekt[i])[1]
+        tabela_cech[i,17] = sredni_kolor(obiekt[i])[2]
     tabela_cech[:,ile_cech] = tabela_cech[:,3]/tabela_cech[:,2] # cecha wyliczana
     tabela_cech[:,0] = (tabela_cech[:,0] == 1) # korekta liczby Eulera
     return listaob, tabela_cech
@@ -204,25 +214,50 @@ def pokazywanie_obiektow(o,lista):
     b = cv2.inRange(o,(1,1,1),(255,255,255))
     # etykietowanie i ekstrakcja cech
     cechy = regionprops(label(b))
-    lo,tc = ekstrakcja_cech(o)
+    
     for i in range(len(lista)):
         yp,xp,yk,xk = cechy[lista[i]]['BoundingBox']
         aktualny_obiekt = o[yp:yk,xp:xk,:]
         wszystkie.append(aktualny_obiekt)
-    polob(wszystkie,colmap='RGB',ile_k=3,osie=(True))
+    #polob(wszystkie,colmap='RGB',ile_k=3,osie=(True))
     return wszystkie
            
 
 
 #sredni kolor
-def sredni_kolor(obiekt,cechy):
-    x,y = cechy[i]['Coordinates']
+def sredni_kolor(obiekt):
+    px = []
+    ref = cv2.inRange(obiekt,(7,7,7),(255,255,255))
+    x=len(ref)
+    y=len(ref[0])
+    #print(ref[42,41])
+    #print(ref[:,0:10])
+    #print(obiekt[:,0:10])
+    for i in range(x-1):
+        for j in range(y-1):
+            if ref[i,j] >0:
+                x = [obiekt[i,j]]
+                px.append(x)
+    #print(px[2])
+    px = np.array(px).T
+    kolor = []
+    kolor.append(np.average(px[0]))
+    kolor.append(np.average(px[1]))
+    kolor.append(np.average(px[2]))
+    kolor = np.array(kolor).astype('int')
+    #print(kolor)
+    return kolor
     
 
+def zapisywanie(lo,tc,ka,tytul):
+    np.savetxt(f"tc_{tytul}.csv",tc)
+    np.savetxt(f"lo_{tytul}.csv",lo)
+    np.savetxt(f"ka_{tytul}.csv",ka)
+    
 
 def skrypt():
     # wczytanie obrazu
-    o = cv2.imread("PA_72_ref.png")
+    o = cv2.imread("PA_7_ref.png")
     b = cv2.inRange(o,(1,1,1),(255,255,255))
     # etykietowanie
     etykiety = label(b)
@@ -239,8 +274,23 @@ def skrypt():
         #polob(lista_klasy,11,colmap='winter')    
         x = np.where(ka == j)
         x = np.ndarray.tolist(x[0])
-        pokazywanie_obiektow(o,x)
+        obrazki = pokazywanie_obiektow(o,x)
+        polob(obrazki,colmap='RGB',ile_k=3,osie=(True))
+    zapisywanie(lo, tc, ka, "PA_7_ref")
+    #obiekt = pokazywanie_obiektow(o, [3])
+    #print(obiekt[0][30:35,30:35])
+    #plt.imshow(obiekt[0][0:25 , 0:25])
+    #o = cv2.inRange(obiekt[0],(1,1,1),(255,255,255))
+    #print("____________________")
+    #print(obiekt[0][0:10, 0:10])
+    #plt.imshow(o[0:35,0:35])
+    #sredni_kolor(obiekt[0])   
+    #print(ka)
+    
+   
 
+
+#skrypt()
 
 
 
