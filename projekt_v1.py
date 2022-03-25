@@ -121,7 +121,8 @@ def ekstrakcja_klas(o):
     
     kategorie1 = np.zeros((ile_obiektow,1)).astype('int')
     kategorie2 = np.zeros((ile_obiektow,1)).astype('int')
-    
+    kategorie3 = np.zeros((ile_obiektow,1)).astype('int')
+    kategorie = np.zeros((ile_obiektow,1)).astype('int')
     lo,tc = ekstrakcja_cech(o)
     for i in range(ile_obiektow):
         if tc[i][4]>0.9:
@@ -145,13 +146,17 @@ def ekstrakcja_klas(o):
         for j in range(len(kolory)):
             #print(len(kolory))
             if(probka[0]<(kolory[j][0]+0.05) and probka[0]>(kolory[j][0]-0.05)):
-                kategorie2[i] = kategorie1[i]*len(kolory)+j
-                #print(f" ksztalt nr {i+1} kategoria1 {kategorie1[i]} kolor {kolory[j]} nr koloru {j} kategoria2 {kategorie2[i]}")
-              
-              
-            
+                kategorie2[i] = j
+        if tc[i][1] > 1100:
+            kategorie3[i] = 0
+        elif tc[i][1] < 450:
+            kategorie3[i] = 2
+        else:
+            kategorie3[i] = 1
+        kategorie[i] = kategorie1[i]*9 + kategorie2[i]*3 + kategorie3[i]
         
-    return kategorie2
+                
+    return kategorie
 
 
 def dzielenie_kolorow(kolory):
@@ -276,7 +281,7 @@ def skrypt():
         x = np.ndarray.tolist(x[0])
         obrazki = pokazywanie_obiektow(o,x)
         polob(obrazki,colmap='RGB',ile_k=3,osie=(True))
-    zapisywanie(lo, tc, ka, "PA_7_ref")
+    #zapisywanie(lo, tc, ka, "PA_7_ref")
     #obiekt = pokazywanie_obiektow(o, [3])
     #print(obiekt[0][30:35,30:35])
     #plt.imshow(obiekt[0][0:25 , 0:25])
@@ -285,12 +290,15 @@ def skrypt():
     #print(obiekt[0][0:10, 0:10])
     #plt.imshow(o[0:35,0:35])
     #sredni_kolor(obiekt[0])   
-    #print(ka)
+    k=1
+    print(tc[k])
+    print(ka[k])
+    polob(pokazywanie_obiektow(o,[k]))
     
    
 
 
-#skrypt()
+
 
 
 

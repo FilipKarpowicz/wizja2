@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Wed Mar 23 18:36:32 2022
+Created on Fri Mar 25 13:21:06 2022
 
 @author: Filip
 """
@@ -33,7 +33,6 @@ from tensorflow import keras
 from projekt_v1 import pokaz,polob,ekstrakcja_cech,ekstrakcja_klas,zamiana_bgr2hsv,zamiana_hsv2bgr,pokazywanie_obiektow
 
 
-
 o = cv2.imread("PA_7_ref.png")
 lo, X = ekstrakcja_cech(o)
 y = np.ravel(ekstrakcja_klas(o))
@@ -53,12 +52,8 @@ x = np.array(lista2)
 
 yy = keras.utils.to_categorical(y,18)
 
-model = Sequential()
-model.add(Dense(30, input_dim=18, activation='sigmoid'))
-model.add(Dense(100, activation='sigmoid'))
-model.add(Dense(18, activation='softmax'))
-model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-model.summary()
+model = keras.models.load_model('model')
+
 
 trening = model.fit(X, yy, epochs=550, batch_size=15)
 
@@ -80,11 +75,3 @@ y_pred_max = np.amax(y_pred,1)
 y_pred_id = np.array([np.argwhere(y_pred==maxval).flatten()[1] for maxval in y_pred_max])
 y_pred_id
 y
-
-
-
-
-
-
-
-
