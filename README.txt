@@ -33,25 +33,41 @@ indeksowanie klas (zależy od referencyjnego obrazka (kolory))
 
 Klasy potem
 
-Dla PA_7_ref
-obj 0. szare kolo pp -  1.426e+3
-obj 1. szary kwadrat pp - 1.805e+3
-obj 2. szare kolo pp - 6.74e+2
-obj 3. szare kolo pp - 292
-obj 4. szary kwadrat - 899
-obj 5. szary kwadrat - 289
-obj 6. zielone kolo - 1.413e+3
-obj 7. zielony kwadrat - 1.721e+3
-obj 8. zielone kolo - 6.52e+2
-obj 9. zielone kolo - 292
-obj 10. zielony kwadrat - 841
-obj 11. zielony kwadrat - 271
-obj 12. magenta kolo - 1.417e+3
-obj 13. magenta kwadrat - 1.799e+3
-obj 14. magenta kolo - 6.68e+2
-obj 15. magenta kolo - 292
-obj 16. magenta kwadrat - 895
-obj 17. magenta kwadrat - 286
+Wzór na klasy
 
+k1 = 1 dla kwadratow
+k1 = 0 dla kol
+
+k2 = 0 dla koloru zielonego
+k2 = 1 dla koloru magenta
+k2 = 2 dla koloru szary
+
+k3 = 0 duzy
+k3 = 1 sredni
+k3 = 2 maly
 
 k1*9+k2*3+k3
+
+0. kolo zielone duze
+1. kolo zielone srednie
+2. kolo zielone male
+3. kolo magenta duze
+4. kolo magenta srednie
+5. kolo magenta male
+6. kolo szare duze
+7. kolo szare srednie
+9. kolo szare male
+10. kwadrat zielony duzy
+11. kwadrat zielony sredni
+12. kwadrat zielony maly
+13. kwadrat magenty duzy
+14. kwadrat magenty sredni
+15. kwadrat magenty maly
+16. kwadrat szary duzy
+17. kwadrat szary sredni
+19. kwadrat szary maly
+
+
+
+
+

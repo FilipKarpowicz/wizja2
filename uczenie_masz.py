@@ -34,7 +34,7 @@ from projekt_v1 import pokaz,polob,ekstrakcja_cech,ekstrakcja_klas,zamiana_bgr2h
 
 
 
-o = cv2.imread("PA_73_ref.png")
+o = cv2.imread("PA_7_ref.png")
 lo, X = ekstrakcja_cech(o)
 y = np.ravel(ekstrakcja_klas(o))
 yy = keras.utils.to_categorical(y,18)
@@ -84,5 +84,6 @@ y_pred_max = np.amax(y_pred,1)
 y_pred_id = np.array([np.argwhere(y_pred==maxval).flatten()[1] for maxval in y_pred_max])
 y_pred_id
 y
+
 
 

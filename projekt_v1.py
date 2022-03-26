@@ -71,7 +71,9 @@ def polob(listaobr, ile_k = 1, listatyt = [], openCV = True, wart_dpi = 100, osi
 def ekstrakcja_cech(o):
     # ekstrakcja cech
     # binaryzacja obrazu
-    b = cv2.inRange(o,(1,1,1),(255,255,255))
+    c = cv2.cvtColor(o,40)
+    b = cv2.inRange(c,(0,0,100),(255,255,255))
+    #pokaz(b)
     # etykietowanie i ekstrakcja cech
     cechy = regionprops(label(b))
     ile_obiektow = len(cechy)
@@ -97,7 +99,7 @@ def ekstrakcja_cech(o):
         
     for i in range(0,ile_obiektow):
         #print(obiekt)
-        print(f"tutaj -----> {sredni_kolor(obiekt[i])}")
+        #print(f"tutaj -----> {sredni_kolor(obiekt[i])}")
         tabela_cech[i,15] = sredni_kolor(obiekt[i])[0]
         tabela_cech[i,16] = sredni_kolor(obiekt[i])[1]
         tabela_cech[i,17] = sredni_kolor(obiekt[i])[2]
@@ -108,7 +110,8 @@ def ekstrakcja_cech(o):
 def ekstrakcja_klas(o):
     # ekstrakcja kategorii
     # binaryzacja obrazu
-    b = cv2.inRange(o,(1,1,1),(255,255,255))
+    c = cv2.cvtColor(o,40)
+    b = cv2.inRange(c,(0,0,100),(255,255,255))
     # etykietowanie i ekstrakcja cech
     cechy = regionprops(label(b))
 
@@ -122,37 +125,38 @@ def ekstrakcja_klas(o):
     kategorie1 = np.zeros((ile_obiektow,1)).astype('int')
     kategorie2 = np.zeros((ile_obiektow,1)).astype('int')
     kategorie3 = np.zeros((ile_obiektow,1)).astype('int')
-    kategorie = np.zeros((ile_obiektow,1)).astype('int')
+    kategorie = np.zeros((ile_obiektow)).astype('int')
     lo,tc = ekstrakcja_cech(o)
     for i in range(ile_obiektow):
         if tc[i][4]>0.9:
             kategorie1[i]=1 #kwadraty
         else:
             kategorie1[i]=0 #koła
-    #print(kolory)
+        print(f'ksztalt {tc[i,4]} -> {kategorie1[i]}')
     for k in range(len(kolory)):    
         kolory[k] = zamiana_bgr2hsv(kolory[k])
     #print(kolory) 
     for i in range(ile_obiektow):
-        # wsp. jednego z punktów obiektu - do próbkowania koloru
-        x,y = np.where(lo[i] == 255)
-        #print(f"dlugosc lo = {len(lo)}")
-        wartosc = x[0]*len(lo[i][0])+y[0]
-        x,y = cechy[i]['Coordinates'][wartosc]
-        probka = o[x,y]
-        #print(i)
+        probka = np.array([tc[i][15],tc[i][16],tc[i][17]])
+        print(f"probka hsv - {probka}")
         probka = zamiana_bgr2hsv(probka)
         #print(f"probka hsv - {probka}")
-        for j in range(len(kolory)):
+        
             #print(len(kolory))
-            if(probka[0]<(kolory[j][0]+0.05) and probka[0]>(kolory[j][0]-0.05)):
-                kategorie2[i] = j
+        if(probka[0]<(0.33+0.05) and probka[0]>(0.33-0.05)):
+            kategorie2[i] = 0   #zielony
+        elif(probka[0]<(0.85+0.05) and probka[0]>(0.85-0.05)):
+            kategorie2[i] = 1   #magenta
+        elif(probka[0]<(0.0+0.05) and probka[0]>(0.0-0.05)):
+            kategorie2[i] = 2   #szary
+        print(f'kolor {probka[0]} -> {kategorie2[i]}')
         if tc[i][1] > 1100:
-            kategorie3[i] = 0
+            kategorie3[i] = 0   #duze
         elif tc[i][1] < 450:
-            kategorie3[i] = 2
+            kategorie3[i] = 2   #male
         else:
-            kategorie3[i] = 1
+            kategorie3[i] = 1   #srednie
+        print(f'wilekosc {tc[i,1]} -> {kategorie3[i]}')
         kategorie[i] = kategorie1[i]*9 + kategorie2[i]*3 + kategorie3[i]
         
                 
@@ -191,7 +195,7 @@ def dzielenie_kolorow(kolory):
         #print(f"loool ->{lol}")
         new.append(lol2)
     new = np.array(new)
-    #uwaga kolory wychodza w rgb  a powinny w bgr
+   
     return new
 
 
@@ -216,7 +220,8 @@ def zamiana_hsv2bgr(kolory):
 
 def pokazywanie_obiektow(o,lista):
     wszystkie =[]
-    b = cv2.inRange(o,(1,1,1),(255,255,255))
+    c = cv2.cvtColor(o,40)
+    b = cv2.inRange(c,(0,0,100),(255,255,255))
     # etykietowanie i ekstrakcja cech
     cechy = regionprops(label(b))
     
@@ -262,8 +267,9 @@ def zapisywanie(lo,tc,ka,tytul):
 
 def skrypt():
     # wczytanie obrazu
-    o = cv2.imread("PA_73_ref.png")
-    b = cv2.inRange(o,(1,1,1),(255,255,255))
+    o = cv2.imread("PA_7_ref.png")
+    c = cv2.cvtColor(o,40)
+    b = cv2.inRange(c,(0,0,100),(255,255,255))
     # etykietowanie
     etykiety = label(b)
     #polob([o,b,etykiety],3)
@@ -273,8 +279,10 @@ def skrypt():
     lo,tc = ekstrakcja_cech(o)
     ka = ekstrakcja_klas(o)
     pokaz(o,colmap='rgb')
+    xd=[]
     for j in range(18):
         lista_klasy = [lo[i] for i in np.where(ka == j)[0]]
+        lista_c = [tc[i] for i in np.where(ka == j)[0]]
         print("klasa:",j," obiektów:", len(lista_klasy))
         #polob(lista_klasy,11,colmap='winter')    
         x = np.where(ka == j)
@@ -293,7 +301,8 @@ def skrypt():
     k=1
     print(tc[k])
     print(ka[k])
-    polob(pokazywanie_obiektow(o,[k]))
+    polob(pokazywanie_obiektow(o,[0]))
+    print(lista_c[5])
     
 #skrypt()
 
