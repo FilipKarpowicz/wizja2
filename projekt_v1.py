@@ -262,7 +262,7 @@ def zapisywanie(lo,tc,ka,tytul):
 
 def skrypt():
     # wczytanie obrazu
-    o = cv2.imread("PA_7_ref.png")
+    o = cv2.imread("PA_73_ref.png")
     b = cv2.inRange(o,(1,1,1),(255,255,255))
     # etykietowanie
     etykiety = label(b)
@@ -273,7 +273,7 @@ def skrypt():
     lo,tc = ekstrakcja_cech(o)
     ka = ekstrakcja_klas(o)
     pokaz(o,colmap='rgb')
-    for j in range(6):
+    for j in range(18):
         lista_klasy = [lo[i] for i in np.where(ka == j)[0]]
         print("klasa:",j," obiektów:", len(lista_klasy))
         #polob(lista_klasy,11,colmap='winter')    
@@ -295,7 +295,7 @@ def skrypt():
     print(ka[k])
     polob(pokazywanie_obiektow(o,[k]))
     
-   
+#skrypt()
 
 
 

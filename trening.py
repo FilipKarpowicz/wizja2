@@ -70,6 +70,10 @@ plt.show()
 
 model.save('model')
 
+o = cv2.imread("PA_7_ref.png")
+lo, X = ekstrakcja_cech(o)
+y = np.ravel(ekstrakcja_klas(o))
+
 y_pred = model.predict(X)
 y_pred_max = np.amax(y_pred,1)
 y_pred_id = np.array([np.argwhere(y_pred==maxval).flatten()[1] for maxval in y_pred_max])
