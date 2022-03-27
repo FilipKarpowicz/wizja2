@@ -6,16 +6,9 @@ Created on Wed Mar 23 18:36:32 2022
 """
 
 import numpy as np
-import pandas as pd
-import math
-import seaborn as sns
-import matplotlib as mpl
 import matplotlib.pyplot as plt
 import cv2
-import colorsys
 
-
-from skimage.measure import label,regionprops
 
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import NearestNeighbors
@@ -34,9 +27,9 @@ from projekt_v1 import pokaz,polob,ekstrakcja_cech,ekstrakcja_klas,zamiana_bgr2h
 
 
 
-o = cv2.imread("PA_7_ref.png")
+o = cv2.imread("PA_73_ref.png")
 lo, X = ekstrakcja_cech(o)
-y = np.ravel(ekstrakcja_klas(o))
+y = np.ravel(ekstrakcja_klas(o,klatki=False))
 yy = keras.utils.to_categorical(y,18)
 
 xx = np.zeros(18)

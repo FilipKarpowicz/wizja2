@@ -33,9 +33,9 @@ from tensorflow import keras
 from projekt_v1 import pokaz,polob,ekstrakcja_cech,ekstrakcja_klas,zamiana_bgr2hsv,zamiana_hsv2bgr,pokazywanie_obiektow
 
 
-o = cv2.imread("data/test432.png")
+o = cv2.imread("PA_73_ref.png")
 lo, X = ekstrakcja_cech(o)
-ka = ekstrakcja_klas(o)
+ka = ekstrakcja_klas(o,klatki=False)
 
 model = keras.models.load_model('model')
 ka = ka.tolist()

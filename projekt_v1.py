@@ -8,9 +8,6 @@ Created on Tue Mar 22 18:06:54 2022
 
 import numpy as np
 import pandas as pd
-import math
-import seaborn as sns
-import matplotlib as mpl
 import matplotlib.pyplot as plt
 import cv2
 import colorsys
@@ -18,26 +15,12 @@ import colorsys
 
 from skimage.measure import label,regionprops
 
-from sklearn.model_selection import train_test_split
-from sklearn.neighbors import NearestNeighbors
-from sklearn.neighbors import KNeighborsClassifier
-from sklearn.neighbors import NearestCentroid
-from sklearn.naive_bayes import GaussianNB
-from sklearn.cluster import KMeans
-from sklearn.metrics import confusion_matrix
-from sklearn import tree
 
-from keras.models import Sequential
-from keras.layers import Dense, Dropout, Activation, Flatten
-from keras.layers import Convolution2D, MaxPooling2D
-from tensorflow import keras
 
-# zmiana sposobu wyświetlania danych typu float
+
 pd.options.display.float_format = "{:.2f}".format 
 
-#FUNKCJE POMOCNICZE
 
-# funkcja wyswietlająca obraz kolorowy lub w skali szarości
 def pokaz(obraz, tytul = "", osie = True, openCV = True, colmap = 'gray'):
     if not(osie):
         plt.axis("off") 
@@ -69,58 +52,50 @@ def polob(listaobr, ile_k = 1, listatyt = [], openCV = True, wart_dpi = 100, osi
 
 
 def ekstrakcja_cech(o):
-    # ekstrakcja cech
-    # binaryzacja obrazu
+    
     c = cv2.cvtColor(o,40)
     b = cv2.inRange(c,(0,0,100),(255,255,255))
-    #pokaz(b)
-    # etykietowanie i ekstrakcja cech
+    
     cechy = regionprops(label(b))
     ile_obiektow = len(cechy)
     lista_cech = ['EulerNumber','Area','BoundingBoxArea','FilledArea','Extent','EquivDiameter','Solidity']
     ile_cech = len(lista_cech)
-    tabela_cech = np.zeros((ile_obiektow,ile_cech+1+7+3)) # "1" - to jedna cecha wyliczna, "7" to momenty Hu
+    tabela_cech = np.zeros((ile_obiektow,ile_cech+1+7+3)) 
     listaob = []
     for i in range(0,ile_obiektow):
         yp,xp,yk,xk = cechy[i]['BoundingBox']
         aktualny_obiekt = o[yp:yk,xp:xk,:]
         ret,binobj = cv2.threshold(aktualny_obiekt[:,:,1],0,255,cv2.THRESH_BINARY)      
-        listaob.append(binobj) #aktualny_obiekt)
-        # rejestrujemy wybrane cechy wyznaczone przez regionprops
+        listaob.append(binobj) 
+        
         for j in range(0,ile_cech):
             tabela_cech[i,j] = cechy[i][lista_cech[j]]
-        # dodajemy momenty Hu   
+         
         hu = cv2.HuMoments(cv2.moments(binobj))
         hulog = (1 - 2*(hu>0).astype('int'))* np.nan_to_num(np.log10(np.abs(hu)),copy=True,neginf=-99,posinf=99)
         tabela_cech[i,ile_cech+1:ile_cech+8] = hulog.flatten()
-        #obiekt = pokazywanie_obiektow(o, [i])
-        #tabela_cech[i][15] = sredni_kolor(obiekt)
+        
         obiekt = pokazywanie_obiektow(o, [i for i in range(ile_obiektow)])
         
     for i in range(0,ile_obiektow):
-        #print(obiekt)
-        #print(f"tutaj -----> {sredni_kolor(obiekt[i])}")
+        
         tabela_cech[i,15] = sredni_kolor(obiekt[i])[0]
         tabela_cech[i,16] = sredni_kolor(obiekt[i])[1]
         tabela_cech[i,17] = sredni_kolor(obiekt[i])[2]
-    tabela_cech[:,ile_cech] = tabela_cech[:,3]/tabela_cech[:,2] # cecha wyliczana
-    tabela_cech[:,0] = (tabela_cech[:,0] == 1) # korekta liczby Eulera
+    tabela_cech[:,ile_cech] = tabela_cech[:,3]/tabela_cech[:,2] 
+    tabela_cech[:,0] = (tabela_cech[:,0] == 1) 
     return listaob, tabela_cech
 
-def ekstrakcja_klas(o):
-    # ekstrakcja kategorii
-    # binaryzacja obrazu
+def ekstrakcja_klas(o,klatki = True):
     c = cv2.cvtColor(o,40)
     b = cv2.inRange(c,(0,0,100),(255,255,255))
-    # etykietowanie i ekstrakcja cech
+    
     cechy = regionprops(label(b))
 
     ile_obiektow = len(cechy)
-    # wyszukiwanie kolorów
+    
     kolory = np.unique(o.reshape(-1, o.shape[2]), axis=0) # kolory w obrazie
     kolory = dzielenie_kolorow(kolory)
-    #print(kolory)
-    #wyszukiwanie kształtow 
     
     kategorie1 = np.zeros((ile_obiektow,1)).astype('int')
     kategorie2 = np.zeros((ile_obiektow,1)).astype('int')
@@ -129,34 +104,43 @@ def ekstrakcja_klas(o):
     lo,tc = ekstrakcja_cech(o)
     for i in range(ile_obiektow):
         if tc[i][4]>0.9:
-            kategorie1[i]=1 #kwadraty
+            kategorie1[i]=1 
         else:
-            kategorie1[i]=0 #koła
-        print(f'ksztalt {tc[i,4]} -> {kategorie1[i]}')
+            kategorie1[i]=0 
+            
+        #print(f'ksztalt {tc[i,4]} -> {kategorie1[i]}')
+        
     for k in range(len(kolory)):    
         kolory[k] = zamiana_bgr2hsv(kolory[k])
-    #print(kolory) 
+    
     for i in range(ile_obiektow):
         probka = np.array([tc[i][15],tc[i][16],tc[i][17]])
-        print(f"probka hsv - {probka}")
-        probka = zamiana_bgr2hsv(probka)
-        #print(f"probka hsv - {probka}")
         
-            #print(len(kolory))
+        #print(f"probka hsv - {probka}")
+        probka = zamiana_bgr2hsv(probka)
+        
         if(probka[0]<(0.33+0.05) and probka[0]>(0.33-0.05)):
-            kategorie2[i] = 0   #zielony
+            kategorie2[i] = 0   
         elif(probka[0]<(0.85+0.05) and probka[0]>(0.85-0.05)):
-            kategorie2[i] = 1   #magenta
+            kategorie2[i] = 1   
         elif(probka[0]<(0.0+0.05) and probka[0]>(0.0-0.05)):
-            kategorie2[i] = 2   #szary
-        print(f'kolor {probka[0]} -> {kategorie2[i]}')
-        if tc[i][1] > 1100:
-            kategorie3[i] = 0   #duze
-        elif tc[i][1] < 450:
-            kategorie3[i] = 2   #male
-        else:
-            kategorie3[i] = 1   #srednie
-        print(f'wilekosc {tc[i,1]} -> {kategorie3[i]}')
+            kategorie2[i] = 2   
+        #print(f'kolor {probka[0]} -> {kategorie2[i]}')
+        if klatki == True:
+            if tc[i][1] > 500:
+                kategorie3[i] = 0   
+            elif tc[i][1] < 250:
+                kategorie3[i] = 2   
+            else:
+                kategorie3[i] = 1   
+        elif klatki == False:
+            if tc[i][1] > 1100:
+                kategorie3[i] = 0   
+            elif tc[i][1] < 450:
+                kategorie3[i] = 2   
+            else:
+                kategorie3[i] = 1   
+        
         kategorie[i] = kategorie1[i]*9 + kategorie2[i]*3 + kategorie3[i]
         
                 
@@ -164,16 +148,14 @@ def ekstrakcja_klas(o):
 
 
 def dzielenie_kolorow(kolory):
-    #kolory hsv: h -> (0,1) | s-> (0,1) |v-> (0,255)
-    # kolory rgb/bgr (0,255) (0,255) (0,255)
-    #rbg\bgr [0,0,0] <-czarne , [255,255,255] <- biale
+    
     
     kolory = np.ndarray.tolist(kolory)
     k=0
     lista = []
     for i in range(len(kolory)):
         kolory[i]=colorsys.rgb_to_hsv(kolory[i][2], kolory[i][1], kolory[i][0])
-    #print(kolory[1:5])
+    
     for i in range(len(kolory)):
         k=0
         if(kolory[i][2]>50):
@@ -186,13 +168,12 @@ def dzielenie_kolorow(kolory):
                         k=1           
                 if k==0:
                     lista.append(kolory[i])
-    #print(lista)
+    
     new = []
     for i in range(len(lista)):
         lol = colorsys.hsv_to_rgb(lista[i][0], lista[i][1], lista[i][2])
         lol2= [lol[2],lol[1],lol[0]]
-        #lol = np.array(lol)
-        #print(f"loool ->{lol}")
+    
         new.append(lol2)
     new = np.array(new)
    
@@ -202,7 +183,7 @@ def dzielenie_kolorow(kolory):
 def zamiana_bgr2hsv(kolory):
     kolory.astype('int')
     kolory = np.ndarray.tolist(kolory)
-    #print(f"kolory81 {kolory}")
+    
     kolory = colorsys.rgb_to_hsv(kolory[2], kolory[1], kolory[0])
     new = np.array(kolory)
     return new
@@ -222,14 +203,13 @@ def pokazywanie_obiektow(o,lista):
     wszystkie =[]
     c = cv2.cvtColor(o,40)
     b = cv2.inRange(c,(0,0,100),(255,255,255))
-    # etykietowanie i ekstrakcja cech
     cechy = regionprops(label(b))
     
     for i in range(len(lista)):
         yp,xp,yk,xk = cechy[lista[i]]['BoundingBox']
         aktualny_obiekt = o[yp:yk,xp:xk,:]
         wszystkie.append(aktualny_obiekt)
-    #polob(wszystkie,colmap='RGB',ile_k=3,osie=(True))
+        
     return wszystkie
            
 
@@ -264,47 +244,123 @@ def zapisywanie(lo,tc,ka,tytul):
     np.savetxt(f"lo_{tytul}.csv",lo)
     np.savetxt(f"ka_{tytul}.csv",ka)
     
+    
 
-def skrypt():
-    # wczytanie obrazu
-    o = cv2.imread("PA_7_ref.png")
-    c = cv2.cvtColor(o,40)
-    b = cv2.inRange(c,(0,0,100),(255,255,255))
-    # etykietowanie
-    etykiety = label(b)
-    #polob([o,b,etykiety],3)
-    # wyznaczanie cech
-    cechy = regionprops(etykiety)
+
+def dodawanie(lista,element):
+    lista[element] = lista[element]+1
+    return lista
+
+
+def liczenie(ref,lista):
+    ref2 = ref
+    #szare duze kolo
+    ref2 = cv2.putText(ref2,f'{lista[6]}',[15,90],1,3,[0,255,0])
+    #szare srednie kolo
+    ref2 = cv2.putText(ref2,f'{lista[7]}',[105,90],1,3,[0,255,0])
+    #szare male kolo
+    ref2 = cv2.putText(ref2,f'{lista[8]}',[190,90],1,3,[0,255,0])
+    #szary duzy kwadrat
+    ref2 = cv2.putText(ref2,f'{lista[15]}',[270,90],1,3,[0,255,0])
+    #szary sredni kwadrat
+    ref2 = cv2.putText(ref2,f'{lista[16]}',[370,90],1,3,[0,255,0])
+    #szary maly kwadrat
+    ref2 = cv2.putText(ref2,f'{lista[17]}',[470,90],1,3,[0,255,0])
     
-    lo,tc = ekstrakcja_cech(o)
-    ka = ekstrakcja_klas(o)
-    pokaz(o,colmap='rgb')
-    xd=[]
-    for j in range(18):
-        lista_klasy = [lo[i] for i in np.where(ka == j)[0]]
-        lista_c = [tc[i] for i in np.where(ka == j)[0]]
-        print("klasa:",j," obiektów:", len(lista_klasy))
-        #polob(lista_klasy,11,colmap='winter')    
-        x = np.where(ka == j)
-        x = np.ndarray.tolist(x[0])
-        obrazki = pokazywanie_obiektow(o,x)
-        polob(obrazki,colmap='RGB',ile_k=3,osie=(True))
-    #zapisywanie(lo, tc, ka, "PA_7_ref")
-    #obiekt = pokazywanie_obiektow(o, [3])
-    #print(obiekt[0][30:35,30:35])
-    #plt.imshow(obiekt[0][0:25 , 0:25])
-    #o = cv2.inRange(obiekt[0],(1,1,1),(255,255,255))
-    #print("____________________")
-    #print(obiekt[0][0:10, 0:10])
-    #plt.imshow(o[0:35,0:35])
-    #sredni_kolor(obiekt[0])   
-    k=1
-    print(tc[k])
-    print(ka[k])
-    polob(pokazywanie_obiektow(o,[0]))
-    print(lista_c[5])
+    #zielone duze kolo
+    ref2 = cv2.putText(ref2,f'{lista[0]}',[15,170],1,3,[0,0,255])
+    #szare srednie kolo
+    ref2 = cv2.putText(ref2,f'{lista[1]}',[105,170],1,3,[0,0,255])
+    #szare male kolo
+    ref2 = cv2.putText(ref2,f'{lista[2]}',[190,170],1,3,[0,0,255])
+    #szary duzy kwadrat
+    ref2 = cv2.putText(ref2,f'{lista[9]}',[270,170],1,3,[0,0,255])
+    #szary sredni kwadrat
+    ref2 = cv2.putText(ref2,f'{lista[10]}',[370,170],1,3,[0,0,255])
+    #szary maly kwadrat
+    ref2 = cv2.putText(ref2,f'{lista[11]}',[470,170],1,3,[0,0,255])
     
-#skrypt()
+    #magenta duze kolo
+    ref2 = cv2.putText(ref2,f'{lista[3]}',[15,270],1,3,[0,255,0])
+    #szare srednie kolo
+    ref2 = cv2.putText(ref2,f'{lista[4]}',[105,270],1,3,[0,255,0])
+    #szare male kolo
+    ref2 = cv2.putText(ref2,f'{lista[5]}',[190,270],1,3,[0,255,0])
+    #szary duzy kwadrat
+    ref2 = cv2.putText(ref2,f'{lista[12]}',[270,270],1,3,[0,255,0])
+    #szary sredni kwadrat
+    ref2 = cv2.putText(ref2,f'{lista[13]}',[370,270],1,3,[0,255,0])
+    #szary maly kwadrat
+    ref2 = cv2.putText(ref2,f'{lista[14]}',[470,270],1,3,[0,255,0])
+    
+    return ref2
+
+
+def jaki_obiekt(idd):
+    if idd == 0:
+        text = 'kolo zielone duze'
+    elif idd == 1: 
+        text = 'kolo zielone srednie'
+    elif idd == 2: 
+        text = 'kolo zielone male'
+    elif idd == 3: 
+        text = 'kolo magenta duze'
+    elif idd == 4:
+        text = 'kolo magenta srednie'
+    elif idd == 5:
+        text = 'kolo magenta male'
+    elif idd == 6: 
+        text = 'kolo szare duze'
+    elif idd == 7: 
+        text = 'kolo szare srednie'
+    elif idd == 8: 
+        text = 'kolo szare male'
+    elif idd == 9: 
+        text = 'kwadrat zielony duzy'
+    elif idd == 10:
+        text = ' kwadrat zielony sredni'
+    elif idd == 11:
+        text = ' kwadrat zielony maly'
+    elif idd == 12:
+        text = ' kwadrat magenta duzy'
+    elif idd == 13:
+        text = ' kwadrat magenta sredni'
+    elif idd == 14:
+        text = ' kwadrat magenta maly'
+    elif idd == 15:
+        text = ' kwadrat szary duzy'
+    elif idd == 16:
+        text = ' kwadrat szary sredni'
+    elif idd == 17:
+        text = ' kwadrat szary maly'
+    return text
+
+
+def zlapany(ramka_org,lista,i,raport,folder = 'dane_klatki'):
+    ref = cv2.imread('PA_7_ref.png')
+    o = ramka_org[0:60,:]
+    nazwa = f'{folder}/klatka{i}.png'
+    
+    
+    
+    new = ekstrakcja_klas(o)
+    lista = dodawanie(lista,new[0])
+    new_ob = liczenie(ref, lista)
+    cv2.imshow('wynik', new_ob)
+    text1 = f'kształt: {jaki_obiekt(new[0])}'
+    text2 = f'Sciezka do klatki - {nazwa}'
+    print(f'znaleziono {text1}')
+    print(f'zapisywanie klatki. {text2}')
+    raport = raport + f'{i}. ' + text1 + '\n' + text2 + '\n'
+    cv2.imwrite(nazwa, ramka_org[20:80,:])
+    return lista, raport
+    
+
+    
+
+
+    
+
 
 
 
