@@ -11,6 +11,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import cv2
 import colorsys
+from test_sieci import model
 
 
 from skimage.measure import label,regionprops
@@ -336,8 +337,10 @@ def jaki_obiekt(idd):
     return text
 
 
-def zlapany(ramka_org,lista,i,raport,folder = 'dane_klatki'):
+def zlapany(ramka_org,lista,lista2,i,raport,folder = 'dane_klatki'):
     ref = cv2.imread('PA_7_ref.png')
+    ref2 = cv2.imread('PA_7_ref.png')
+    
     o = ramka_org[0:60,:]
     nazwa = f'{folder}/klatka{i}.png'
     
@@ -347,14 +350,22 @@ def zlapany(ramka_org,lista,i,raport,folder = 'dane_klatki'):
     lista = dodawanie(lista,new[0])
     new_ob = liczenie(ref, lista)
     cv2.imshow('wynik', new_ob)
-    text1 = f'kształt: {jaki_obiekt(new[0])}'
-    text2 = f'Sciezka do klatki - {nazwa}'
+    
+    _,dane = ekstrakcja_cech(o)
+    new2 = model(dane)
+    lista2 = dodawanie(lista2,new2[0])
+    new_ob2 = liczenie(ref2, lista2)
+    cv2.imshow('wynik_model', new_ob2)
+    
+    text1 = f'kształt z ekstrakcji: {jaki_obiekt(new[0])}'
+    text3 = f'   kształt z modelu: {jaki_obiekt(new2[0])}'
+    text2 = f'   Sciezka do klatki - {nazwa}'
     print(f'znaleziono {text1}')
     print(f'zapisywanie klatki. {text2}')
-    raport = raport + f'{i}. ' + text1 + '\n' + text2 + '\n'
+    raport = raport + f'{i}. ' + text1 + '\n' + text3 + '\n' + text2 + '\n'
     cv2.imwrite(nazwa, ramka_org[20:80,:])
     return lista, raport
-    
+        
 
     
 

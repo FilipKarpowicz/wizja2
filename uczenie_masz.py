@@ -27,24 +27,7 @@ from projekt_v1 import pokaz,polob,ekstrakcja_cech,ekstrakcja_klas,zamiana_bgr2h
 
 
 
-o = cv2.imread("PA_73_ref.png")
-lo, X = ekstrakcja_cech(o)
-y = np.ravel(ekstrakcja_klas(o,klatki=False))
-yy = keras.utils.to_categorical(y,18)
 
-xx = np.zeros(18)
-lista = [i for i in range(18)]
-wszystkie = pokazywanie_obiektow(o, lista)
-lista2 = []
-for i in range(18):
-    lista2.append(wszystkie[i])
-x = np.array(lista2)
-
-
-
-
-
-yy = keras.utils.to_categorical(y,18)
 
 model = Sequential()
 
@@ -57,26 +40,9 @@ model.add(Dense(18, activation='softmax'))
 model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
 model.summary()
 
-trening = model.fit(X, yy, epochs=550, batch_size=30)
-
-_, dokladnosc = model.evaluate(X, yy)
-print('Dokładność: %.2f' % (dokladnosc*100))
-
-blad = trening.history['loss']
-dokladnosc = trening.history['accuracy']
-plt.plot(blad)
-plt.plot(dokladnosc)
-plt.plot(np.ones([1,len(blad)]).ravel())
-plt.legend(['błąd', 'dokładność','1'])
-plt.show()
-
 model.save('model')
 
-y_pred = model.predict(X)
-y_pred_max = np.amax(y_pred,1)
-y_pred_id = np.array([np.argwhere(y_pred==maxval).flatten()[1] for maxval in y_pred_max])
-y_pred_id
-y
+
 
 
 

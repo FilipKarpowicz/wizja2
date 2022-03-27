@@ -36,9 +36,9 @@ from projekt_v1 import pokaz,polob,ekstrakcja_cech,ekstrakcja_klas,zamiana_bgr2h
 lo = []
 X = []
 y = []
-for i in range(7,1030):
+for i in range(0,986):
     try:
-        o = cv2.imread(f"data/test{i}.png")
+        o = cv2.imread(f"data1/klatka{i}.png")
         lo1, X1 = ekstrakcja_cech(o)
         y1 = np.ravel(ekstrakcja_klas(o))
         lo.append(lo1[0])
