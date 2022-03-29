@@ -12,10 +12,6 @@ from projekt_v1 import  liczenie, zlapany,pokaz
 import shutil
 import os
 from datetime import datetime as dt
-from test_sieci import model
-
-
-
 
 
 

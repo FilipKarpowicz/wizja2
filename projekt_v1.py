@@ -108,8 +108,6 @@ def ekstrakcja_klas(o,klatki = True):
             kategorie1[i]=1 
         else:
             kategorie1[i]=0 
-            
-        #print(f'ksztalt {tc[i,4]} -> {kategorie1[i]}')
         
     for k in range(len(kolory)):    
         kolory[k] = zamiana_bgr2hsv(kolory[k])
@@ -117,7 +115,6 @@ def ekstrakcja_klas(o,klatki = True):
     for i in range(ile_obiektow):
         probka = np.array([tc[i][15],tc[i][16],tc[i][17]])
         
-        #print(f"probka hsv - {probka}")
         probka = zamiana_bgr2hsv(probka)
         
         if(probka[0]<(0.33+0.05) and probka[0]>(0.33-0.05)):
@@ -126,7 +123,7 @@ def ekstrakcja_klas(o,klatki = True):
             kategorie2[i] = 1   
         elif(probka[0]<(0.0+0.05) and probka[0]>(0.0-0.05)):
             kategorie2[i] = 2   
-        #print(f'kolor {probka[0]} -> {kategorie2[i]}')
+        
         if klatki == True:
             if tc[i][1] > 500:
                 kategorie3[i] = 0   
@@ -215,28 +212,24 @@ def pokazywanie_obiektow(o,lista):
            
 
 
-#sredni kolor
 def sredni_kolor(obiekt):
     px = []
     ref = cv2.inRange(obiekt,(7,7,7),(255,255,255))
     x=len(ref)
     y=len(ref[0])
-    #print(ref[42,41])
-    #print(ref[:,0:10])
-    #print(obiekt[:,0:10])
     for i in range(x-1):
         for j in range(y-1):
             if ref[i,j] >0:
                 x = [obiekt[i,j]]
                 px.append(x)
-    #print(px[2])
+    
     px = np.array(px).T
     kolor = []
     kolor.append(np.average(px[0]))
     kolor.append(np.average(px[1]))
     kolor.append(np.average(px[2]))
     kolor = np.array(kolor).astype('int')
-    #print(kolor)
+    
     return kolor
     
 
