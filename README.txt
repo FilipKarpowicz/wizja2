@@ -1,4 +1,5 @@
-
+Aby wyłączyć rozpoznawanie obrazow za pomoca sieci neuronowej nalezy w pliku main.py (linia 17) ustawic wartosc
+zmiennej czy_model z True na False
 
 indeksowanie cech
 0. liczba Eulera (EulerNumber) 
