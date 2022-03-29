@@ -7,12 +7,16 @@ Created on Sat Mar 26 16:39:19 2022
 
 import numpy as np
 from tensorflow import keras
+import cv2
+from projekt_v1 import ekstrakcja_cech, model,ekstrakcja_klas
 
-  
-def model(dane):
-    model = keras.models.load_model('model')
-    y_pred = model.predict(dane)
-    y_pred_max = np.amax(y_pred,1)
-    y_pred_id = np.array([np.argwhere(y_pred==maxval).flatten()[1] for maxval in y_pred_max])
-    return y_pred_id
 
+
+
+o = cv2.imread(f"PA_76_ref.png")
+lo,tc = ekstrakcja_cech(o)
+ka = ekstrakcja_klas(o)
+wynik = model(tc)
+
+print(wynik)
+print(ka)

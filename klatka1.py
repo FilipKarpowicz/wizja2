@@ -7,12 +7,20 @@ Created on Wed Mar 23 18:21:28 2022
 
 import numpy as np
 import cv2
+import os
+import shutil
 
 
 wideo = cv2.VideoCapture('PA_7.avi')
 
 i=0
 
+if os.path.exists('data'):
+    shutil.rmtree('data') 
+
+os.mkdir('data')
+
+k=0
 while(True):
     ret, ramka_org = wideo.read()
     
@@ -40,7 +48,7 @@ while(True):
         k= True
         
     if k == True and np.sum(ramka_01[0,:]) == 0 and np.sum(ramka_01[59,:]) == 0 and np.sum(ramka_01) != 0:
-       cv2.imwrite(f'data1/klatka{i}.png',ramka_org[20:80,:]) 
+       cv2.imwrite(f'data/klatka{i}.png',ramka_org[20:80,:]) 
        i=i+1
        
     

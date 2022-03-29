@@ -1,4 +1,4 @@
-WAŻNE!
+
 
 indeksowanie cech
 0. liczba Eulera (EulerNumber) 
@@ -20,18 +20,6 @@ indeksowanie cech
 16. Składowa koloru G
 17. Składowa koloru B/R
 
-
-indeksowanie klas (zależy od referencyjnego obrazka (kolory))
-1. koło kolor 1 (zielone)
-2. koło kolor 2 (magenta)
-3. kolo kolor 3 (szare)
-4. kwadrat kolor 1
-5. kwadrat kolor 2
-6. kwadrat kolor 3
-
------kolory w nawiasach dla obrazka PA_7_ref-----
-
-Klasy potem
 
 Wzór na klasy
 

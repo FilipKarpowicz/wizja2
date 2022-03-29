@@ -14,9 +14,9 @@ import os
 from datetime import datetime as dt
 
 
-
+czy_model = True
 raport = f'Raport rozpoznawania obrazow \nProjekt Wizja2 \nData:{dt.now()}\n\n'
-folder = 'dane_klatki'
+folder = 'Dane_wynik'
 wideo = cv2.VideoCapture('PA_7.avi')
 ref = cv2.imread('PA_7_ref.png')
 
@@ -32,7 +32,8 @@ lista = np.zeros(18).astype('int')
 lista2 = np.zeros(18).astype('int')
 ob = liczenie(ref,lista)
 cv2.imshow('wynik', ob)
-cv2.imshow('wynik_model', ob)
+if czy_model == True:
+    cv2.imshow('wynik_model', ob)
 
 i=0
 k = False
@@ -43,7 +44,7 @@ while(1):
     ret, ramka_org = wideo.read()
     if not ret:
         break
-    ramka = ramka_org
+    ramka = cv2.GaussianBlur(ramka_org, (3,3), 2)
         
     obraz1 = cv2.cvtColor(ramka,40)
         
@@ -71,7 +72,7 @@ while(1):
         k= True
         
     if k == True and np.sum(ramka_01[0,:]) == 0 and np.sum(ramka_01[59,:]) == 0 and zapis == False and np.sum(ramka_01) != 0:
-        lista, raport = zlapany(ramka_org,lista,lista2,i,raport,folder)
+        lista, raport = zlapany(ramka_org,lista,lista2,i,raport,folder,czy_model)
         i=i+1
         zapis = True
         poczatek = False

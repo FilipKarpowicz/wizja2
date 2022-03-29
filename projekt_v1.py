@@ -11,7 +11,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import cv2
 import colorsys
-from test_sieci import model
+
+from tensorflow import keras
+
 
 
 from skimage.measure import label,regionprops
@@ -49,6 +51,14 @@ def polob(listaobr, ile_k = 1, listatyt = [], openCV = True, wart_dpi = 100, osi
             pokaz(listaobr[i],listatyt[i],osie,openCV, colmap)
     plt.show()
 
+
+
+def model(dane):
+    model = keras.models.load_model('model')
+    y_pred = model.predict(dane)
+    y_pred_max = np.amax(y_pred,1)
+    y_pred_id = np.array([np.argwhere(y_pred==maxval).flatten()[1] for maxval in y_pred_max])
+    return y_pred_id
 
 
 
@@ -330,7 +340,7 @@ def jaki_obiekt(idd):
     return text
 
 
-def zlapany(ramka_org,lista,lista2,i,raport,folder = 'dane_klatki'):
+def zlapany(ramka_org,lista,lista2,i,raport,folder = 'dane_klatki',czy_model = False):
     ref = cv2.imread('PA_7_ref.png')
     ref2 = cv2.imread('PA_7_ref.png')
     
@@ -344,40 +354,22 @@ def zlapany(ramka_org,lista,lista2,i,raport,folder = 'dane_klatki'):
     new_ob = liczenie(ref, lista)
     cv2.imshow('wynik', new_ob)
     
-    _,dane = ekstrakcja_cech(o)
-    new2 = model(dane)
-    lista2 = dodawanie(lista2,new2[0])
-    new_ob2 = liczenie(ref2, lista2)
-    cv2.imshow('wynik_model', new_ob2)
-    
     text1 = f'kształt z ekstrakcji: {jaki_obiekt(new[0])}'
-    text3 = f'   kształt z modelu: {jaki_obiekt(new2[0])}'
     text2 = f'   Sciezka do klatki - {nazwa}'
     print(f'znaleziono {text1}')
     print(f'zapisywanie klatki. {text2}')
-    raport = raport + f'{i}. ' + text1 + '\n' + text3 + '\n' + text2 + '\n'
+    
+    if czy_model ==True:
+        _,dane = ekstrakcja_cech(o)
+        new2 = model(dane)
+        lista2 = dodawanie(lista2,new2[0])
+        new_ob2 = liczenie(ref2, lista2)
+        cv2.imshow('wynik_model', new_ob2)
+        text3 = f'   kształt z modelu: {jaki_obiekt(new2[0])}'
+        raport = raport + f'{i}. ' + text1 + '\n' + text3 + '\n' + text2 + '\n'
+    else:
+        raport = raport + f'{i}. ' + text1 + '\n' + text2 + '\n'
+    
     cv2.imwrite(nazwa, ramka_org[20:80,:])
     return lista, raport
         
-
-    
-
-
-    
-
-
-
-
-
-
-
-
-        
-
-
-
-    
-
-
-
-
